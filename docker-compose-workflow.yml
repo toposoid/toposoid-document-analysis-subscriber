@@ -264,7 +264,3 @@ services:
       ENABLE_MODULES: 'text2vec-cohere,text2vec-huggingface,text2vec-palm,text2vec-openai,generative-openai,generative-cohere,generative-palm,ref2vec-centroid,reranker-cohere,qna-openai'
       CLUSTER_HOSTNAME: 'node1'
 
-  toposoid-language-detector-web:
-    image: toposoid/toposoid-language-detector-web:0.6-SNAPSHOT
-    ports:
-      - 9017:9017

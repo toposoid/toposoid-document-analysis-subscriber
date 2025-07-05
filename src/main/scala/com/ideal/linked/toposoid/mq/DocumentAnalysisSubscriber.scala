@@ -71,8 +71,6 @@ object DocumentAnalysisSubscriber extends App with LazyLogging {
 
   private val queueUrl = endpoint + "/" + conf.getString("TOPOSOID_MQ_DOCUMENT_ANALYSIS_QUENE")
   private val settings = SqsSourceSettings()
-  private val langPatternJP: Regex = "^ja_.*".r
-  private val langPatternEN: Regex = "^en_.*".r
 
   private def convertKnowledge(knowledge: Knowledge): Knowledge = {
     val knowledgeForImages: List[KnowledgeForImage] = knowledge.knowledgeForImages.map(y => {
@@ -310,6 +308,8 @@ object DocumentAnalysisSubscriber extends App with LazyLogging {
                 val knowledgeForParser: KnowledgeForParser = x
                 val inputSentenceForParser = InputSentenceForParser(List.empty[KnowledgeForParser], List(knowledgeForParser))
                 val json: String = Json.toJson(inputSentenceForParser).toString()
+
+                /*
                 val parserInfo: (String, String) = knowledgeForParser.knowledge.lang match {
                   case langPatternJP() => (conf.getString("TOPOSOID_SENTENCE_PARSER_JP_WEB_HOST"), conf.getString("TOPOSOID_SENTENCE_PARSER_JP_WEB_PORT"))
                   case langPatternEN() => (conf.getString("TOPOSOID_SENTENCE_PARSER_EN_WEB_HOST"), conf.getString("TOPOSOID_SENTENCE_PARSER_EN_WEB_PORT"))
@@ -317,6 +317,26 @@ object DocumentAnalysisSubscriber extends App with LazyLogging {
                 }
                 val parseResult: String = ToposoidUtils.callComponent(json, parserInfo._1, parserInfo._2, "analyze", transversalState)
                 val analyzedSentenceObjects: AnalyzedSentenceObjects = Json.parse(parseResult).as[AnalyzedSentenceObjects]
+                */
+                val analyzedSentenceObjects: AnalyzedSentenceObjects = knowledgeForParser.knowledge.lang match {
+                  case ToposoidUtils.langPatternJP() => {
+                    val host = conf.getString("TOPOSOID_SENTENCE_PARSER_JP_WEB_HOST")
+                    val port = conf.getString("TOPOSOID_SENTENCE_PARSER_JP_WEB_PORT")
+                    val parseResult: String = ToposoidUtils.callComponent(json, host, port, "analyze", transversalState)
+                    Json.parse(parseResult).as[AnalyzedSentenceObjects]
+                  }
+                  case ToposoidUtils.langPatternEN() => {
+                    val host = conf.getString("TOPOSOID_SENTENCE_PARSER_EN_WEB_HOST")
+                    val port = conf.getString("TOPOSOID_SENTENCE_PARSER_EN_WEB_PORT")
+                    val parseResult: String = ToposoidUtils.callComponent(json, host, port, "analyze", transversalState)
+                    Json.parse(parseResult).as[AnalyzedSentenceObjects]
+                  }
+                  case ToposoidUtils.langPatternSpecialSymbol1() => {
+                    val aso = ToposoidUtils.parseSpecialSymbol(knowledgeForParser)
+                    AnalyzedSentenceObjects(List(aso))
+                  }
+                  case _ => throw new Exception("It is an invalid locale or an unsupported locale.")
+                }
 
                 val analyzedPropositionPair: AnalyzedPropositionPair = AnalyzedPropositionPair(analyzedSentenceObjects, knowledgeForParser)
                 //In the analysis results of pdf documents, there is no link between images and table labels and predicate terms.
