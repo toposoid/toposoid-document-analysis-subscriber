@@ -50,8 +50,7 @@ jobs:
             docker compose -f docker-compose-workflow.yml up -d toposoid-common-image-recognition-web          
             docker compose -f docker-compose-workflow.yml up -d toposoid-common-nlp-japanese-web          
             docker compose -f docker-compose-workflow.yml up -d toposoid-common-nlp-english-web #Required for NO_REFERENCE embedding
-            docker compose -f docker-compose-workflow.yml up -d toposoid-sentence-parser-japanese-web
-            docker compose -f docker-compose-workflow.yml up -d data-accessor-redis-web
+            docker compose -f docker-compose-workflow.yml up -d toposoid-sentence-parser-japanese-web            
             docker compose -f docker-compose-workflow.yml up -d data-accessor-mysql-web            
             docker compose -f docker-compose-workflow.yml up -d data-accessor-neo4j-web   
             curl --retry 15 --retry-delay 5 --retry-all-errors -X POST http://localhost:7474
