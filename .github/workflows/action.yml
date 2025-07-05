@@ -36,8 +36,7 @@ jobs:
             docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt headerCheck"
             docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt test:headerCheck"
             docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt compile"
-            docker compose -f docker-compose-workflow.yml up -d mysql
-            docker compose -f docker-compose-workflow.yml up -d redis
+            docker compose -f docker-compose-workflow.yml up -d mysql            
             docker compose -f docker-compose-workflow.yml up -d neo4j
             docker compose -f docker-compose-workflow.yml up -d elasticmq
             docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt 'runMain com.ideal.linked.toposoid.mq.KnowledgeRegisterSubscriber' &"
