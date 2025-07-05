@@ -232,7 +232,7 @@ services:
   data-accessor-non-sentence-weaviate-web:
     image: toposoid/data-accessor-weaviate-web:0.6-SNAPSHOT
     environment:
-      - TOPOSOID_WEAVIATE_HOST=172.30.0.23
+      - TOPOSOID_WEAVIATE_HOST=non-sentence-weaviate
       - TOPOSOID_WEAVIATE_PORT=8082
       - TOPOSOID_WEAVIATE_SIMILARITY_THRESHOLD=0.85
       - TOPOSOID_DATA_ACCESSOR_PORT=9011
