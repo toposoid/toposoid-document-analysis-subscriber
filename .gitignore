@@ -1,0 +1,9 @@
+target/
+.idea/
+project/target/
+.DS_Store
+*.class
+*.log
+.bsp/
+docker-compose-local.yml
+
