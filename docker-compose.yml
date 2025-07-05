@@ -25,6 +25,15 @@ services:
       - TOPOSOID_JVM_XSS=512k
       - TOPOSOID_MQ_ACCESS_KEY=__##YOUR_AWS_ACCESS_KEY##__
       - TOPOSOID_MQ_SECRET_KEY=__##YOUR_AWS_SECRET_KEY##__
+      - TOPOSOID_GRAPHDB_WEB_HOST=data-accessor-neo4j-web
+      - TOPOSOID_COMMON_IMAGE_RECOGNITION_HOST=toposoid-common-image-recognition-web
+      - TOPOSOID_COMMON_IMAGE_RECOGNITION_PORT=9013
+      - TOPOSOID_SENTENCE_VECTORDB_ACCESSOR_HOST=data-accessor-sentence-weaviate-web
+      - TOPOSOID_SENTENCE_VECTORDB_ACCESSOR_PORT=9011
+      - TOPOSOID_IMAGE_VECTORDB_ACCESSOR_HOST=data-accessor-image-weaviate-web
+      - TOPOSOID_IMAGE_VECTORDB_ACCESSOR_PORT=9011
+      - TOPOSOID_NON_SENTENCE_VECTORDB_ACCESSOR_HOST=data-accessor-non-sentence-weaviate-web
+      - TOPOSOID_NON_SENTENCE_VECTORDB_ACCESSOR_PORT=9011
 
   toposoid-contents-admin-web:
     image: toposoid/toposoid-contents-admin-web:0.6-SNAPSHOT
