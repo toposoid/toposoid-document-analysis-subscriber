@@ -27,7 +27,7 @@ jobs:
             docker images
             docker system prune -f
             docker volume prune -f
-            docker build --build-arg TARGET_BRANCH=${{ env.PJ_BRANCH }} --tag ${{ env.PJ_REPO }}:${{ env.PJ_VERSION }} -f Dockerfile-workflow .
+            docker build --build-arg TARGET_BRANCH=${{ env.PJ_BRANCH }} --tag ${{ env.PJ_REPO }}:${{ env.PJ_VERSION }} --load -f Dockerfile-workflow .
             sed -i s/___###YOUR_ADOBE_PDF_SERVICES_CLIENT_ID###___/${{ secrets.ADOBE_PDF_SERVICES_CLIENT_ID }}/g docker-compose-workflow.yml
             sed -i s/___###YOUR_ADOBE_PDF_SERVICES_CLIENT_SECRET###___/${{ secrets.ADOBE_PDF_SERVICES_CLIENT_SECRET }}/g docker-compose-workflow.yml                        
             sed -i s/__##YOUR_AWS_ACCESS_KEY##__/${{ secrets.AWS_CREDENTIAL_ACCESSKEY }}/g docker-compose-workflow.yml

@@ -17,8 +17,7 @@ services:
       - TOPOSOID_CONTENTS_ADMIN_PORT=9012
       - TOPOSOID_MQ_HOST=elasticmq
       - TOPOSOID_MQ_PORT=9324
-      - TOPOSOID_MQ_DOCUMENT_ANALYSIS_QUENE = toposoid-document-analysis-queue.fifo
-      - TOPOSOID_MQ_KNOWLEDGE_REGISTER_QUENE = toposoid-knowledge-register-queue.fifo
+      - TOPOSOID_MQ_DOCUMENT_ANALYSIS_QUENE=toposoid-document-analysis-queue.fifo
       - TOPOSOID_RDB_WEB_HOST=data-accessor-mysql-web
       - TOPOSOID_RDB_WEB_PORT=9016
       - TOPOSOID_JVM_XMS=512m
