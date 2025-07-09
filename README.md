@@ -20,7 +20,9 @@ sbt　publishLocal
 ```
 
 ## Usage
-
+```bash
+curl -X POST localhost:9012/uploadDocumentFile -H 'X_TOPOSOID_TRANSVERSAL_STATE: {"userId":"test-user", "username":"guest", "roleId":0, "csrfToken":""}' -F "uploadfile=@YourFilePath;type=application/octet-stream"
+```
 ## Note
 
 ## License
