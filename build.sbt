@@ -21,6 +21,7 @@ lazy val root = (project in file("."))
     libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.2",
     libraryDependencies += "io.jvm.uuid" %% "scala-uuid" % "0.3.1",
     libraryDependencies += "com.ibm.icu" % "icu4j" % "63.1",
+      libraryDependencies += "com.softwaremill.sttp.client4" %% "core" % "4.0.9",
   )
 
 organizationName := "Linked Ideal LLC.[https://linked-ideal.com/]"

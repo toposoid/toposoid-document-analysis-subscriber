@@ -4,8 +4,6 @@ Toposoid is a knowledge base construction platform.(see [Toposoid　Root Project
 This microservice get information from Neo4J graph database. outputs the result in JSON.
 
 
-
-
 ## Requirements
 Scala version 2.13.x,   
 Sbt version 1.4.9.
@@ -18,6 +16,11 @@ Sbt version 1.4.9.
 ```
 sbt　publishLocal
 ```
+* This library uses The PDF Extract API. In order to use The PDF Extract API, you need to create credentials. https://developer.adobe.com/document-services/apis/pdf-services/
+  After creating the credentials, please set the following environment variables in docker-compose.yml.
+  TOPOSOID_PDF_SERVICES_CLIENT_ID
+  TOPOSOID_PDF_SERVICES_CLIENT_SECRET
+
 
 ## Usage
 ```bash
