@@ -147,9 +147,9 @@ object DocumentAnalysisSubscriber extends App with LazyLogging {
     //Delete orphan nodes
     val query2 = s"MATCH (n) WHERE n.propositionId = '${knowledgeForParser.propositionId}' DELETE n"
     neo4JUtils.executeQuery(query2, transversalState)
-    val query3 = s"MATCH (n) WHERE n.documentId = '${knowledgeForParser.knowledge.knowledgeForDocument.id}' DELETE n"
-    neo4JUtils.executeQuery(query3, transversalState)
-    FeatureVectorizer.removeVector(knowledgeForParser, transversalState)
+    //val query3 = s"MATCH (n) WHERE n.documentId = '${knowledgeForParser.knowledge.knowledgeForDocument.id}' DELETE n"
+    //neo4JUtils.executeQuery(query3, transversalState)
+    FeatureVectorizer.removeVectorByPropositionId(knowledgeForParser, transversalState)
 
   }
 
