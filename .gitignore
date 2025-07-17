@@ -6,4 +6,7 @@ project/target/
 *.log
 .bsp/
 docker-compose-local.yml
+src/test/resources/real-documents/*
+docker-compose-test.yml
+docker-compose-tool.yml
 

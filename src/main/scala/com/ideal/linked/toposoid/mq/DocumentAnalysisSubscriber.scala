@@ -293,7 +293,8 @@ object DocumentAnalysisSubscriber extends App with LazyLogging {
       try {
         //PDFドキュメントの解析
         val propositions = analyzePdfDocument(document, transversalState)
-        for ((proposition: List[Knowledge], i: Int) <- propositions.propositions.zipWithIndex) {
+        for ((rawProposition: List[Knowledge], i: Int) <- propositions.propositions.zipWithIndex) {
+          val proposition = ToposoidUtils.preprocessForSentence(rawProposition)
           //propositionごとに、知識の登録は行われる。
           val (knowledgeSentenceSetForParser, propositionId) = assignId(makeKnowledgeSentenceSet(proposition))
           val knowledgeRegistration: KnowledgeRegistration = KnowledgeRegistration(

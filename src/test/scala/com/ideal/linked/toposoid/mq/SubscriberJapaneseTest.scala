@@ -47,7 +47,8 @@ class SubscriberJapaneseTest extends AnyFlatSpec with BeforeAndAfter with Before
 
   "the request json" should "be properly analyzed" in {
 
-    val uploadFile: Path = Paths.get("src/test/resources/JAPANESE_DOCUMENT_FOR_TEST.pdf")
+    //val uploadFile: Path = Paths.get("src/test/resources/JAPANESE_DOCUMENT_FOR_TEST.pdf")
+    val uploadFile: Path = Paths.get("src/test/resources/real-documents/jp/CONTRACT2.pdf")
     uploadDocumentFile(uploadFile, transversalState)
 
     val sentence1 = "これは最初のパラグラフの文章です。"
