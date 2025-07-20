@@ -2,7 +2,7 @@ version: '3'
 
 services:
   toposoid-document-analysis-subscriber:
-    image: toposoid/toposoid-document-analysis-subscriber:0.6
+    image: toposoid-document-analysis-subscriber:0.6
     environment:
       - TOPOSOID_SENTENCE_PARSER_JP_WEB_HOST=toposoid-sentence-parser-japanese-web
       - TOPOSOID_SENTENCE_PARSER_JP_WEB_PORT=9001
