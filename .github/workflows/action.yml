@@ -8,7 +8,7 @@ env:
   PJ_ACTOR: toposoid
   PJ_REPO: toposoid-document-analysis-subscriber
   PJ_BRANCH: feature
-  PJ_VERSION: 0.6-SNAPSHOT
+  PJ_VERSION: 0.6
 jobs:
   unit-test_toposoid-document-analysis-subscriber:
     runs-on: self-hosted
@@ -30,14 +30,14 @@ jobs:
             docker volume prune -f
             docker build --build-arg TARGET_BRANCH=${{ env.PJ_BRANCH }} --tag ${{ env.PJ_REPO }}:${{ env.PJ_VERSION }} -f Dockerfile-workflow --no-cache .
             sed -i s/___###YOUR_ADOBE_PDF_SERVICES_CLIENT_ID###___/${{ secrets.ADOBE_PDF_SERVICES_CLIENT_ID }}/g docker-compose-workflow.yml
-            sed -i s/___###YOUR_ADOBE_PDF_SERVICES_CLIENT_SECRET###___/${{ secrets.ADOBE_PDF_SERVICES_CLIENT_SECRET }}/g docker-compose-workflow.yml                        
+            sed -i s/___###YOUR_ADOBE_PDF_SERVICES_CLIENT_SECRET###___/${{ secrets.ADOBE_PDF_SERVICES_CLIENT_SECRET }}/g docker-compose-workflow.yml
             sed -i s/__##YOUR_AWS_ACCESS_KEY##__/${{ secrets.AWS_CREDENTIAL_ACCESSKEY }}/g docker-compose-workflow.yml
-            sed -i s/__##YOUR_AWS_SECRET_KEY##__/${{ secrets.AWS_CREDINTIAL_SECRETKEY }}/g docker-compose-workflow.yml                                    
+            sed -i s/__##YOUR_AWS_SECRET_KEY##__/${{ secrets.AWS_CREDINTIAL_SECRETKEY }}/g docker-compose-workflow.yml
             docker compose -f docker-compose-workflow.yml up -d toposoid-document-analysis-subscriber
             docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt headerCheck"
             docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt test:headerCheck"
             docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt compile"
-            docker compose -f docker-compose-workflow.yml up -d mysql            
+            docker compose -f docker-compose-workflow.yml up -d mysql
             docker compose -f docker-compose-workflow.yml up -d neo4j
             docker compose -f docker-compose-workflow.yml up -d elasticmq
             docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt 'runMain com.ideal.linked.toposoid.mq.DocumentAnalysisSubscriber' &"
@@ -46,23 +46,23 @@ jobs:
             docker compose -f docker-compose-workflow.yml up -d non-sentence-weaviate
             docker compose -f docker-compose-workflow.yml up -d data-accessor-sentence-weaviate-web
             docker compose -f docker-compose-workflow.yml up -d data-accessor-image-weaviate-web
-            docker compose -f docker-compose-workflow.yml up -d data-accessor-non-sentence-weaviate-web                                  
+            docker compose -f docker-compose-workflow.yml up -d data-accessor-non-sentence-weaviate-web
             docker compose -f docker-compose-workflow.yml up -d toposoid-contents-admin-web
-            docker compose -f docker-compose-workflow.yml up -d toposoid-common-image-recognition-web          
-            docker compose -f docker-compose-workflow.yml up -d toposoid-common-nlp-japanese-web          
+            docker compose -f docker-compose-workflow.yml up -d toposoid-common-image-recognition-web
+            docker compose -f docker-compose-workflow.yml up -d toposoid-common-nlp-japanese-web
             docker compose -f docker-compose-workflow.yml up -d toposoid-common-nlp-english-web #Required for NO_REFERENCE embedding
-            docker compose -f docker-compose-workflow.yml up -d toposoid-sentence-parser-japanese-web            
-            docker compose -f docker-compose-workflow.yml up -d data-accessor-mysql-web            
-            docker compose -f docker-compose-workflow.yml up -d data-accessor-neo4j-web   
+            docker compose -f docker-compose-workflow.yml up -d toposoid-sentence-parser-japanese-web
+            docker compose -f docker-compose-workflow.yml up -d data-accessor-mysql-web
+            docker compose -f docker-compose-workflow.yml up -d data-accessor-neo4j-web
             #docker compose -f docker-compose-workflow.yml up -d toposoid-language-detector-web
             curl --retry 15 --retry-delay 5 --retry-all-errors -X POST http://localhost:7474
             curl --retry 15 --retry-delay 5 --retry-all-errors -X POST -H "Content-Type: application/json" -H "X_TOPOSOID_TRANSVERSAL_STATE: {'userId':'test-user', 'username':'guest', 'roleId':0, 'csrfToken':''}" -d '{"sentence": "これはテストです。"}' http://localhost:9006/getFeatureVector
             curl --retry 15 --retry-delay 5 --retry-all-errors -X POST -H "Content-Type: application/json" -H "X_TOPOSOID_TRANSVERSAL_STATE: {'userId':'test-user', 'username':'guest', 'roleId':0, 'csrfToken':''}" -d '{"sentence": "This is a test"}' http://localhost:9008/getFeatureVector
-            echo 'quit' | curl -s -o /dev/null telnet://localhost:3306          
+            echo 'quit' | curl -s -o /dev/null telnet://localhost:3306
             docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt 'testOnly **.*JapaneseTest'"
             docker compose -f docker-compose-workflow.yml rm -fsv toposoid-common-nlp-japanese-web
             docker compose -f docker-compose-workflow.yml rm -fsv toposoid-sentence-parser-japanese-web
-            docker compose -f docker-compose-workflow.yml up -d corenlp            
+            docker compose -f docker-compose-workflow.yml up -d corenlp
             docker compose -f docker-compose-workflow.yml up -d toposoid-sentence-parser-english-web
             curl --retry 15 --retry-delay 5 --retry-all-errors -X POST  -d 'Life is beautiful.' http://localhost:9000
             docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt 'testOnly **.*EnglishTest'"
