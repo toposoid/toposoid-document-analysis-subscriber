@@ -89,7 +89,7 @@ services:
     ports:
       - 9001:9001
   toposoid-common-nlp-japanese-web:
-    image: toposoid/toposoid-common-nlp-japanese-web:0.6
+    image: toposoid/toposoid-common-nlp-japanese-web:0.6-lowspec
     environment:
       - TOPOSOID_SYNONYM_NOUN_SIMILARITY_THRESHHOLD_JP=0.52
       - TOPOSOID_SYNONYM_VERB_SIMILARITY_THRESHHOLD_JP=0.52
@@ -101,7 +101,7 @@ services:
     ports:
       - 9006:9006
   toposoid-sentence-parser-english-web:
-    image: toposoid/toposoid-sentence-parser-english-web:0.6
+    image: toposoid/toposoid-sentence-parser-english-web:0.6-lowspec
     environment:
       - PLAY_HTTP_PORT=9007
       - TOPOSOID_CORENLP_HOST=corenlp
@@ -109,7 +109,7 @@ services:
     ports:
       - 9007:9007
   toposoid-common-nlp-english-web:
-    image: toposoid/toposoid-common-nlp-english-web:0.6
+    image: toposoid/toposoid-common-nlp-english-web:0.6-lowspec
     environment:
       - TOPOSOID_SYNONYM_NOUN_SIMILARITY_THRESHHOLD_EN=0.52
       - TOPOSOID_SYNONYM_VERB_SIMILARITY_THRESHHOLD_EN=0.52
@@ -151,7 +151,7 @@ services:
     ports:
       - 9005:9005
   toposoid-common-image-recognition-web:
-    image: toposoid/toposoid-common-image-recognition-web:0.6
+    image: toposoid/toposoid-common-image-recognition-web:0.6-lowspec
     environment:
       - TOPOSOID_IMAGE_RECOGNITION_VIT_MODEL=google/vit-base-patch16-224
       - TOPOSOID_IMAGE_RECOGNITION_MOBILE_VIT_MODEL=apple/mobilevit-small
