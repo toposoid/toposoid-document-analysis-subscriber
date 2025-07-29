@@ -1,0 +1,90 @@
+name: Test And Build
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+  workflow_dispatch:
+env:
+  PJ_ACTOR: toposoid
+  PJ_REPO: toposoid-document-analysis-subscriber
+  PJ_BRANCH: main
+  PJ_VERSION: 0.6
+jobs:
+  unit-test_toposoid-document-analysis-subscriber:
+    runs-on: self-hosted
+    steps:
+      - name: Clone ${{ env.PJ_REPO }}
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.PJ_ACTOR }}/${{ env.PJ_REPO }}
+      - name: Execute tests
+        run: |
+          cd ${GITHUB_WORKSPACE} && cd ../
+          cd ./${{ env.PJ_REPO }}
+          docker rm --force $(docker ps -a -q) > /dev/null 2>&1 && :
+          docker rmi --force ${{ env.PJ_REPO }}:${{ env.PJ_VERSION }}> /dev/null 2>&1 && :
+          docker rmi --force toposoid/${{ env.PJ_REPO }}:${{ env.PJ_VERSION }}> /dev/null 2>&1 && :
+          docker rmi --force toposoid/toposoid-scala-lib:${{ env.PJ_VERSION }}> /dev/null 2>&1 && :
+          docker images
+          docker system prune -f
+          docker volume prune -f
+          docker build --build-arg TARGET_BRANCH=${{ env.PJ_BRANCH }} --tag ${{ env.PJ_REPO }}:${{ env.PJ_VERSION }} --load -f Dockerfile-workflow --no-cache .
+          sed -i s/___###YOUR_ADOBE_PDF_SERVICES_CLIENT_ID###___/${{ secrets.ADOBE_PDF_SERVICES_CLIENT_ID }}/g docker-compose-workflow.yml
+          sed -i s/___###YOUR_ADOBE_PDF_SERVICES_CLIENT_SECRET###___/${{ secrets.ADOBE_PDF_SERVICES_CLIENT_SECRET }}/g docker-compose-workflow.yml
+          sed -i s/__##YOUR_AWS_ACCESS_KEY##__/${{ secrets.AWS_CREDENTIAL_ACCESSKEY }}/g docker-compose-workflow.yml
+          sed -i s/__##YOUR_AWS_SECRET_KEY##__/${{ secrets.AWS_CREDINTIAL_SECRETKEY }}/g docker-compose-workflow.yml
+          docker compose -f docker-compose-workflow.yml up -d toposoid-document-analysis-subscriber
+          docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt headerCheck"
+          docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt test:headerCheck"
+          docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt compile"
+          docker compose -f docker-compose-workflow.yml up -d mysql
+          docker compose -f docker-compose-workflow.yml up -d neo4j
+          docker compose -f docker-compose-workflow.yml up -d elasticmq
+          docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt 'runMain com.ideal.linked.toposoid.mq.DocumentAnalysisSubscriber' &"
+          docker compose -f docker-compose-workflow.yml up -d sentence-weaviate
+          docker compose -f docker-compose-workflow.yml up -d image-weaviate
+          docker compose -f docker-compose-workflow.yml up -d non-sentence-weaviate
+          docker compose -f docker-compose-workflow.yml up -d data-accessor-sentence-weaviate-web
+          docker compose -f docker-compose-workflow.yml up -d data-accessor-image-weaviate-web
+          docker compose -f docker-compose-workflow.yml up -d data-accessor-non-sentence-weaviate-web
+          docker compose -f docker-compose-workflow.yml up -d toposoid-contents-admin-web
+          docker compose -f docker-compose-workflow.yml up -d toposoid-common-image-recognition-web
+          docker compose -f docker-compose-workflow.yml up -d toposoid-common-nlp-japanese-web
+          docker compose -f docker-compose-workflow.yml up -d toposoid-common-nlp-english-web #Required for NO_REFERENCE embedding
+          docker compose -f docker-compose-workflow.yml up -d toposoid-sentence-parser-japanese-web
+          docker compose -f docker-compose-workflow.yml up -d data-accessor-mysql-web
+          docker compose -f docker-compose-workflow.yml up -d data-accessor-neo4j-web
+          #docker compose -f docker-compose-workflow.yml up -d toposoid-language-detector-web
+          curl --retry 15 --retry-delay 5 --retry-all-errors -X POST http://localhost:7474
+          curl --retry 15 --retry-delay 5 --retry-all-errors -X POST -H "Content-Type: application/json" -H "X_TOPOSOID_TRANSVERSAL_STATE: {'userId':'test-user', 'username':'guest', 'roleId':0, 'csrfToken':''}" -d '{"sentence": "これはテストです。"}' http://localhost:9006/getFeatureVector
+          curl --retry 15 --retry-delay 5 --retry-all-errors -X POST -H "Content-Type: application/json" -H "X_TOPOSOID_TRANSVERSAL_STATE: {'userId':'test-user', 'username':'guest', 'roleId':0, 'csrfToken':''}" -d '{"sentence": "This is a test"}' http://localhost:9008/getFeatureVector
+          echo 'quit' | curl -s -o /dev/null telnet://localhost:3306
+          docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt 'testOnly **.*JapaneseTest'"
+          docker compose -f docker-compose-workflow.yml rm -fsv toposoid-common-nlp-japanese-web
+          docker compose -f docker-compose-workflow.yml rm -fsv toposoid-sentence-parser-japanese-web
+          docker compose -f docker-compose-workflow.yml up -d corenlp
+          docker compose -f docker-compose-workflow.yml up -d toposoid-sentence-parser-english-web
+          curl --retry 15 --retry-delay 5 --retry-all-errors -X POST  -d 'Life is beautiful.' http://localhost:9000
+          docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt 'testOnly **.*EnglishTest'"
+          docker rm --force $(docker ps -a -q) > /dev/null 2>&1 && :
+          docker rmi --force ${{ env.PJ_REPO }}:${{ env.PJ_VERSION }}> /dev/null 2>&1 && :
+      - name: Docker meta
+        id: docker_meta
+        uses: crazy-max/ghaction-docker-meta@v3
+        with:
+          images: toposoid/${{ env.PJ_REPO }}:${{ env.PJ_VERSION }}
+      - name: Login to CR
+        uses: docker/login-action@v2
+        with:
+          username: toposoid
+          password: ${{ secrets.CR_TOKEN }}
+      - name: Build And Push Docker Image For Test
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: toposoid/${{ env.PJ_REPO }}:${{ env.PJ_VERSION }}
+          build-args: |
+            TARGET_BRANCH=${{ env.PJ_BRANCH }}

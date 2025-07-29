@@ -1,0 +1,265 @@
+version: '3'
+
+services:
+  toposoid-document-analysis-subscriber:
+    image: toposoid/toposoid-document-analysis-subscriber:0.6
+    environment:
+      - TOPOSOID_SENTENCE_PARSER_JP_WEB_HOST=toposoid-sentence-parser-japanese-web
+      - TOPOSOID_SENTENCE_PARSER_JP_WEB_PORT=9001
+      - TOPOSOID_SENTENCE_PARSER_EN_WEB_HOST=toposoid-sentence-parser-english-web
+      - TOPOSOID_SENTENCE_PARSER_EN_WEB_PORT=9007
+      - TOPOSOID_COMMON_NLP_JP_WEB_HOST=toposoid-common-nlp-japanese-web
+      - TOPOSOID_COMMON_NLP_JP_WEB_PORT=9006
+      - TOPOSOID_COMMON_NLP_EN_WEB_HOST=toposoid-common-nlp-english-web
+      - TOPOSOID_COMMON_NLP_EN_WEB_PORT=9008
+      - TOPOSOID_CONTENTS_ADMIN_HOST=toposoid-contents-admin-web
+      - TOPOSOID_CONTENTS_ADMIN_PORT=9012
+      - TOPOSOID_MQ_HOST=elasticmq
+      - TOPOSOID_MQ_PORT=9324
+      - TOPOSOID_MQ_DOCUMENT_ANALYSIS_QUENE=toposoid-document-analysis-queue.fifo
+      - TOPOSOID_RDB_WEB_HOST=data-accessor-mysql-web
+      - TOPOSOID_RDB_WEB_PORT=9016
+      - TOPOSOID_JVM_XMS=512m
+      - TOPOSOID_JVM_XMX=4g
+      - TOPOSOID_JVM_XSS=512k
+      - TOPOSOID_MQ_ACCESS_KEY=__##YOUR_AWS_ACCESS_KEY##__
+      - TOPOSOID_MQ_SECRET_KEY=__##YOUR_AWS_SECRET_KEY##__
+      - TOPOSOID_GRAPHDB_WEB_HOST=data-accessor-neo4j-web
+      - TOPOSOID_GRAPHDB_WEB_PORT=9005
+      - TOPOSOID_COMMON_IMAGE_RECOGNITION_HOST=toposoid-common-image-recognition-web
+      - TOPOSOID_COMMON_IMAGE_RECOGNITION_PORT=9013
+      - TOPOSOID_SENTENCE_VECTORDB_ACCESSOR_HOST=data-accessor-sentence-weaviate-web
+      - TOPOSOID_SENTENCE_VECTORDB_ACCESSOR_PORT=9011
+      - TOPOSOID_IMAGE_VECTORDB_ACCESSOR_HOST=data-accessor-image-weaviate-web
+      - TOPOSOID_IMAGE_VECTORDB_ACCESSOR_PORT=9011
+      - TOPOSOID_NON_SENTENCE_VECTORDB_ACCESSOR_HOST=data-accessor-non-sentence-weaviate-web
+      - TOPOSOID_NON_SENTENCE_VECTORDB_ACCESSOR_PORT=9011
+
+  toposoid-contents-admin-web:
+    image: toposoid/toposoid-contents-admin-web:0.6
+    environment:
+      - TOPOSOID_CONTENTS_URL=http://toposoid-contents-admin-web:9012/contents/
+      - TOPOSOID_RDB_WEB_HOST=data-accessor-mysql-web
+      - TOPOSOID_RDB_WEB_PORT=9016
+      - TOPOSOID_MQ_HOST=elasticmq
+      - TOPOSOID_MQ_PORT=9324
+      - TOPOSOID_MQ_ACCESS_KEY=AK
+      - TOPOSOID_MQ_SECRET_KEY=SK
+      - TOPOSOID_MQ_REGION=MQ-REGION
+      - TOPOSOID_MQ_DOCUMENT_ANALYSIS_QUENE=toposoid-document-analysis-queue.fifo
+      - TOPOSOID_MQ_KNOWLEDGE_REGISTER_QUENE=toposoid-knowledge-register-queue.fifo
+      - TOPOSOID_PDF_SERVICES_CLIENT_ID=___###YOUR_ADOBE_PDF_SERVICES_CLIENT_ID###___
+      - TOPOSOID_PDF_SERVICES_CLIENT_SECRET=___###YOUR_ADOBE_PDF_SERVICES_CLIENT_SECRET###___
+    ports:
+      - 9012:9012
+  elasticmq:
+    image: toposoid/toposoid-elasticmq:0.6
+    ports:
+      - 9324:9324
+
+  data-accessor-mysql-web:
+    image: toposoid/data-accessor-mysql-web:0.6
+    environment:
+      - PRIVATE_IP_ADDRESS=data-accessor-mysql-web
+      - TOPOSOID_RDB_HOST=mysql
+      - TOPOSOID_RDB_URL=jdbc:mysql://mysql/toposoiddb?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+      - TOPOSOID_JVM_XMS=512m
+      - TOPOSOID_JVM_XMX=1g
+      - TOPOSOID_JVM_XSS=512k
+      - PLAY_HTTP_PORT=9016
+    ports:
+      - 9016:9016
+    depends_on:
+      - mysql
+  mysql:
+    image: toposoid/toposoid-rdb:0.6
+    environment:
+      - MYSQL_DATABASE=toposoiddb
+      - MYSQL_USER=toposoid
+      - MYSQL_PASSWORD=p@ssw0rd
+      - MYSQL_ROOT_PASSWORD=p@ssw0rd
+      - TZ=UTC
+    ports:
+      - 3306:3306
+  toposoid-sentence-parser-japanese-web:
+    image: toposoid/toposoid-sentence-parser-japanese-web:0.6
+    environment:
+      - PRIVATE_IP_ADDRESS=toposoid-sentence-parser-japanese-web
+      - PLAY_HTTP_PORT=9001
+    ports:
+      - 9001:9001
+  toposoid-common-nlp-japanese-web:
+    image: toposoid/toposoid-common-nlp-japanese-web:0.6-lowspec
+    environment:
+      - TOPOSOID_SYNONYM_NOUN_SIMILARITY_THRESHHOLD_JP=0.52
+      - TOPOSOID_SYNONYM_VERB_SIMILARITY_THRESHHOLD_JP=0.52
+      - TOPOSOID_WORD2VEC_SIMILARITY_THRESHHOLD_JP=0.68
+      - TOPOSOID_CHIVE_MODEL_VERSION=chive-1.2-mc90.kv
+      - TOPOSOID_SENTENCEBERT_MODEL_JP=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+      - SENTENCE_TRANSFORMERS_HOME=./models
+      - PLAY_HTTP_PORT=9006
+    ports:
+      - 9006:9006
+  toposoid-sentence-parser-english-web:
+    image: toposoid/toposoid-sentence-parser-english-web:0.6-lowspec
+    environment:
+      - PLAY_HTTP_PORT=9007
+      - TOPOSOID_CORENLP_HOST=corenlp
+      - TOPOSOID_PARSER_SPACY_MODEL_EN=en_core_web_md
+    ports:
+      - 9007:9007
+  toposoid-common-nlp-english-web:
+    image: toposoid/toposoid-common-nlp-english-web:0.6-lowspec
+    environment:
+      - TOPOSOID_SYNONYM_NOUN_SIMILARITY_THRESHHOLD_EN=0.52
+      - TOPOSOID_SYNONYM_VERB_SIMILARITY_THRESHHOLD_EN=0.52
+      - TOPOSOID_WORD2VEC_SIMILARITY_THRESHHOLD_EN=0.78
+      - TOPOSOID_SPACY_MODEL_EN=en_core_web_md
+      - TOPOSOID_SENTENCEBERT_MODEL_EN=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+      - SENTENCE_TRANSFORMERS_HOME=./models
+      - PLAY_HTTP_PORT=9008
+    ports:
+      - 9008:9008
+  corenlp:
+    image: toposoid/corenlp:3.4.2-lowspec
+    ports:
+      - 9000:9000
+  neo4j:
+    #    container_name: Neo4j-test
+    image: neo4j:4.4.23
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,algo.*
+      - NEO4J_dbms_memory_heap_initial__size=512m
+      - NEO4J_dbms_memory_heap_max__size=2G
+      - NEO4J_apoc_uuid_enabled=true
+      - NEO4J_dbms_default__listen__address=0.0.0.0
+      - NEO4J_dbms_allow__upgrade=true
+      - NEO4J_dbms_default__database=neo4j
+      - NEO4J_AUTH=neo4j/p@ssw0rd
+
+  data-accessor-neo4j-web:
+    image: toposoid/data-accessor-neo4j-web:0.6
+    environment:
+      - PRIVATE_IP_ADDRESS=data-accessor-neo4j-web
+      - TOPOSOID_GRAPHDB_HOST=neo4j
+      - PLAY_HTTP_PORT=9005
+    ports:
+      - 9005:9005
+  toposoid-common-image-recognition-web:
+    image: toposoid/toposoid-common-image-recognition-web:0.6-lowspec
+    environment:
+      - TOPOSOID_IMAGE_RECOGNITION_VIT_MODEL=google/vit-base-patch16-224
+      - TOPOSOID_IMAGE_RECOGNITION_MOBILE_VIT_MODEL=apple/mobilevit-small
+      - TOPOSOID_IMAGE_RECOGNITION_MOBILE_VIT_USE=1
+    ports:
+      - 9013:9013
+
+  data-accessor-sentence-weaviate-web:
+    image: toposoid/data-accessor-weaviate-web:0.6
+    environment:
+      - TOPOSOID_WEAVIATE_HOST=sentence-weaviate
+      - TOPOSOID_WEAVIATE_PORT=8080
+      - TOPOSOID_WEAVIATE_SIMILARITY_THRESHOLD=0.85
+      - TOPOSOID_DATA_ACCESSOR_PORT=9011
+    ports:
+      - 9020:9011
+    depends_on:
+      - sentence-weaviate
+  sentence-weaviate:
+    command:
+      - --host
+      - 0.0.0.0
+      - --port
+      - '8080'
+      - --scheme
+      - http
+    image: cr.weaviate.io/semitechnologies/weaviate:1.26.3
+    ports:
+      - 8080:8080
+    #volumes:
+    #  - /var/weaviate:/var/lib/weaviate
+    restart: on-failure:0
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      DEFAULT_VECTORIZER_MODULE: 'text2vec-huggingface'
+      HUGGINGFACE_APIKEY: ''
+      ENABLE_MODULES: 'text2vec-cohere,text2vec-huggingface,text2vec-palm,text2vec-openai,generative-openai,generative-cohere,generative-palm,ref2vec-centroid,reranker-cohere,qna-openai'
+      CLUSTER_HOSTNAME: 'node1'
+
+  data-accessor-image-weaviate-web:
+    image: toposoid/data-accessor-weaviate-web:0.6
+    environment:
+      - TOPOSOID_WEAVIATE_HOST=image-weaviate
+      - TOPOSOID_WEAVIATE_PORT=8081
+      - TOPOSOID_WEAVIATE_SIMILARITY_THRESHOLD=0.85
+      - TOPOSOID_DATA_ACCESSOR_PORT=9011
+    ports:
+      - 9021:9011
+    depends_on:
+      - image-weaviate
+
+  image-weaviate:
+    command:
+      - --host
+      - 0.0.0.0
+      - --port
+      - '8081'
+      - --scheme
+      - http
+    image: cr.weaviate.io/semitechnologies/weaviate:1.26.3
+    ports:
+      - 8081:8081
+    #volumes:
+    #  - /var/weaviate:/var/lib/weaviate
+    restart: on-failure:0
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      DEFAULT_VECTORIZER_MODULE: 'text2vec-huggingface'
+      HUGGINGFACE_APIKEY: ''
+      ENABLE_MODULES: 'text2vec-cohere,text2vec-huggingface,text2vec-palm,text2vec-openai,generative-openai,generative-cohere,generative-palm,ref2vec-centroid,reranker-cohere,qna-openai'
+      CLUSTER_HOSTNAME: 'node1'
+
+  data-accessor-non-sentence-weaviate-web:
+    image: toposoid/data-accessor-weaviate-web:0.6
+    environment:
+      - TOPOSOID_WEAVIATE_HOST=non-sentence-weaviate
+      - TOPOSOID_WEAVIATE_PORT=8082
+      - TOPOSOID_WEAVIATE_SIMILARITY_THRESHOLD=0.85
+      - TOPOSOID_DATA_ACCESSOR_PORT=9011
+    ports:
+      - 9022:9011
+    depends_on:
+      - non-sentence-weaviate
+
+  non-sentence-weaviate:
+    image: cr.weaviate.io/semitechnologies/weaviate:1.26.3
+    command:
+      - --host
+      - 0.0.0.0
+      - --port
+      - '8082'
+      - --scheme
+      - http
+    ports:
+      - 8082:8082
+    #volumes:
+    #  - /var/weaviate:/var/lib/weaviate
+    restart: on-failure:0
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      DEFAULT_VECTORIZER_MODULE: 'text2vec-huggingface'
+      HUGGINGFACE_APIKEY: ''
+      ENABLE_MODULES: 'text2vec-cohere,text2vec-huggingface,text2vec-palm,text2vec-openai,generative-openai,generative-cohere,generative-palm,ref2vec-centroid,reranker-cohere,qna-openai'
+      CLUSTER_HOSTNAME: 'node1'
+
