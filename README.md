@@ -1,7 +1,7 @@
 # toposoid-knowledge-register-subscriber
 This is a subscriber that works as a microservice within the Toposoid project.
 Toposoid is a knowledge base construction platform.(see [Toposoid　Root Project](https://github.com/toposoid/toposoid.git))
-This microservice get information from Neo4J graph database. outputs the result in JSON.
+This microservice provides the functionality to register from a document.
 
 
 ## Requirements
