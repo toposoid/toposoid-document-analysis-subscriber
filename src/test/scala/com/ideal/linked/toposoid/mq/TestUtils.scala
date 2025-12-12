@@ -17,6 +17,7 @@
 
 package com.ideal.linked.toposoid.mq
 
+/*
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.client.RequestBuilding.Post
@@ -25,6 +26,7 @@ import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ContentTypes, Multipart}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
+*/
 import com.ideal.linked.common.DeploymentConverter.conf
 import com.ideal.linked.toposoid.common._
 import com.ideal.linked.toposoid.knowledgebase.featurevector.model.{FeatureVectorIdentifier, FeatureVectorSearchResult, RegistContentResult, SingleFeatureVectorForSearch}
@@ -37,6 +39,10 @@ import play.api.libs.json.Json
 import java.nio.file.Path
 import scala.util.matching.Regex
 import scala.util.{Failure, Success}
+import sttp.client4._
+import sttp.model._
+import java.io.File
+import scala.concurrent.duration.{Duration, DurationInt}
 
 object TestUtils {
   //val langPatternJP: Regex = "^ja_.*".r
@@ -62,6 +68,25 @@ object TestUtils {
 
   def uploadDocumentFile(file:Path, transversalState:TransversalState): String = {
 
+    //val filePath = new File("/app/toposoid-document-analysis-subscriber/src/test/resources/JAPANESE_DOCUMENT_FOR_TEST.pdf") // Replace with your file path
+    val fileName = "JAPANESE_DOCUMENT_FOR_TEST.pdf" // The name the file will have on the server
+    val endpoint = "http://" + conf.getString("TOPOSOID_CONTENTS_ADMIN_HOST") + ":" + conf.getString("TOPOSOID_CONTENTS_ADMIN_PORT") + "/uploadDocumentFile"
+    
+    val backend = DefaultSyncBackend(
+      options = BackendOptions.connectionTimeout(1.minute))
+    val request = basicRequest
+    .header(TRANSVERSAL_STATE.str, Json.toJson(transversalState).toString())      
+    .httpVersion(HttpVersion.HTTP_1_1)
+    .post(uri"${endpoint}") // Replace with your upload endpoint
+    .multipartBody(
+        multipartFile("uploadfile", file.toFile()).fileName(file.getFileName().toString()).contentType("application/octet-stream") // "file" is the field name on the server
+    )
+    val response = request.send(backend)
+    response.body match {
+      case Right(successBody) => s"$successBody"
+      case Left(errorBody) => s"Upload failed. Status code: ${response.code}. Error body: $errorBody"
+    }
+    /*
     implicit val system = ActorSystem()
     implicit val materializer = ActorMaterializer()
     implicit val executionContext = system.dispatcher
@@ -74,14 +99,16 @@ object TestUtils {
       Multipart.FormData.BodyPart.fromPath("uploadfile", ContentTypes.`application/octet-stream`, file)
     )
 
-    val request = Post(uri, entity=formData.toEntity()).withHeaders(RawHeader(TRANSVERSAL_STATE.str, Json.toJson(transversalState).toString()))
-    val result = Http().singleRequest(request)
+    val request = Post(uri, entity=formData.toEntity).withHeaders(RawHeader(TRANSVERSAL_STATE.str, Json.toJson(transversalState).toString()))
+    val result = Http(system).singleRequest(request)
       .flatMap { res =>
         Unmarshal(res).to[String].map { data =>
           Json.parse(data.getBytes("UTF-8"))
         }
       }
+    
     var queryResultJson: String = "{}"
+    
     result.onComplete {
       case Success(js) =>
         println(s"Success: $js")
@@ -91,9 +118,9 @@ object TestUtils {
     }
     while (!result.isCompleted) {
       Thread.sleep(20)
-    }
+    }    
     queryResultJson
-
+    */
   }
 
   def searchSentenceVector(targets:List[String], lang:String, transversalState: TransversalState):List[FeatureVectorSearchResult] ={
