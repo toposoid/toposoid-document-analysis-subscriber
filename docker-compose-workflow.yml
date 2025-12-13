@@ -35,6 +35,7 @@ services:
       - TOPOSOID_IMAGE_VECTORDB_ACCESSOR_PORT=9011
       - TOPOSOID_NON_SENTENCE_VECTORDB_ACCESSOR_HOST=data-accessor-non-sentence-weaviate-web
       - TOPOSOID_NON_SENTENCE_VECTORDB_ACCESSOR_PORT=9011
+      - TOPOSOID_AKKA_LICENCE_KEY=__##YOUR_AKKA_LICENCE_KEY##__
 
   toposoid-contents-admin-web:
     image: toposoid/toposoid-contents-admin-web:0.7-SNAPSHOT

@@ -25,7 +25,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import com.ideal.linked.toposoid.mq.TestUtils.{deleteFeatureVector, deleteNeo4JAllData, searchDocumentAnalysisResultHistoryRecord, searchKnowledgeRegisterHistoryRecord, searchNonSentenceSectionsRecord, uploadDocumentFile}
 import com.ideal.linked.toposoid.protocol.model.neo4j.Neo4jRecords
 import com.ideal.linked.toposoid.sentence.transformer.neo4j.Sentence2Neo4jTransformer.neo4JUtils.executeQueryAndReturn
-import io.jvm.uuid.UUID
+//import io.jvm.uuid.UUID
 
 import java.nio.file.{Path, Paths}
 
@@ -96,7 +96,7 @@ class SubscriberEnglishTest extends AnyFlatSpec with BeforeAndAfter with BeforeA
     //イメージ
     val reference = Reference(url = "", surface = "", surfaceIndex = -1, isWholeSentence = false, originalUrlOrReference = "http://images.cocodataset.org/val2017/000000039769.jpg", metaInformations = List.empty[String])
     val imageReference = ImageReference(reference = reference, x = 0, y = 0, width = 640, height = 480)
-    val knowledgeForImage = KnowledgeForImage(id = UUID.random.toString, imageReference = imageReference)
+    val knowledgeForImage = KnowledgeForImage(id = java.util.UUID.randomUUID().toString, imageReference = imageReference)
     val imageInfo = uploadImage(knowledgeForImage, transversalState)
     val searchImages = TestUtils.searchImageVector(imageInfo.imageReference.reference.url, transversalState)
     assert(searchImages.ids.size == 1)
