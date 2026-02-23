@@ -28,7 +28,7 @@ import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
 */
 import com.ideal.linked.common.DeploymentConverter.conf
-import com.ideal.linked.toposoid.common._
+import com.ideal.linked.toposoid.common.{FeatureType, TransversalState, Neo4JUtilsImpl, CaseGroupType, ToposoidUtils, TRANSVERSAL_STATE}
 import com.ideal.linked.toposoid.knowledgebase.featurevector.model.{FeatureVectorIdentifier, FeatureVectorSearchResult, RegistContentResult, SingleFeatureVectorForSearch}
 import com.ideal.linked.toposoid.knowledgebase.image.model.SingleImage
 import com.ideal.linked.toposoid.knowledgebase.nlp.model.{FeatureVector, SingleSentence}
@@ -55,13 +55,13 @@ object TestUtils {
   }
 
   def deleteFeatureVector(superiorId:String, featureType: FeatureType, lang:String, superiorType:Int, transversalState: TransversalState): Unit = {
-    val featureVectorIdentifier: FeatureVectorIdentifier = FeatureVectorIdentifier(superiorId = superiorId, featureId = "-", sentenceType = -1, lang = lang , superiorType = superiorType, nonSentenceType = 0)
+    val featureVectorIdentifier: FeatureVectorIdentifier = FeatureVectorIdentifier(superiorId = superiorId, featureId = "-", sentenceType = -1, lang = lang , superiorType = superiorType, nonSentenceType = 0, caseGroupType = 0)
     val json: String = Json.toJson(featureVectorIdentifier).toString()
-    if (featureType.equals(SENTENCE)) {
+    if (featureType.equals(FeatureType.SENTENCE)) {
       ToposoidUtils.callComponent(json, conf.getString("TOPOSOID_SENTENCE_VECTORDB_ACCESSOR_HOST"), conf.getString("TOPOSOID_SENTENCE_VECTORDB_ACCESSOR_PORT"), "deleteBySuperiorId", transversalState)
-    } else if (featureType.equals(IMAGE)) {
+    } else if (featureType.equals(FeatureType.IMAGE)) {
       ToposoidUtils.callComponent(json, conf.getString("TOPOSOID_IMAGE_VECTORDB_ACCESSOR_HOST"), conf.getString("TOPOSOID_IMAGE_VECTORDB_ACCESSOR_PORT"), "deleteBySuperiorId", transversalState)
-    } else if (featureType.equals(NON_SENTENCE)){
+    } else if (featureType.equals(FeatureType.NON_SENTENCE)){
       ToposoidUtils.callComponent(json, conf.getString("TOPOSOID_NON_SENTENCE_VECTORDB_ACCESSOR_HOST"), conf.getString("TOPOSOID_NON_SENTENCE_VECTORDB_ACCESSOR_PORT"), "deleteBySuperiorId", transversalState)
     }
   }

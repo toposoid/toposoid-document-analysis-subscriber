@@ -17,15 +17,15 @@
 
 package com.ideal.linked.toposoid.mq
 
-import akka.actor.ActorSystem
-import akka.stream.alpakka.sqs.{MessageAction, SqsAckResult, SqsSourceSettings}
-import akka.stream.alpakka.sqs.scaladsl.{SqsAckFlow, SqsSource}
-import akka.stream.scaladsl.Sink
-import com.github.matsluni.akkahttpspi.AkkaHttpClient
+//import akka.actor.ActorSystem
+//import akka.stream.alpakka.sqs.{MessageAction, SqsAckResult, SqsSourceSettings}
+//import akka.stream.alpakka.sqs.scaladsl.{SqsAckFlow, SqsSource}
+//import akka.stream.scaladsl.Sink
+//import com.github.matsluni.akkahttpspi.AkkaHttpClient
 import com.ibm.icu.text.Transliterator
 import com.ideal.linked.common.DeploymentConverter.conf
 import com.ideal.linked.toposoid.common.ToposoidUtils.assignId
-import com.ideal.linked.toposoid.common.{HEADLINES, Neo4JUtils, Neo4JUtilsImpl, NonSentenceType, REFERENCES, TABLE_OF_CONTENTS, TITLE_OF_TOP_PAGE, ToposoidUtils, TransversalState}
+import com.ideal.linked.toposoid.common.{Neo4JUtils, Neo4JUtilsImpl, NonSentenceType, ToposoidUtils, TransversalState}
 import com.ideal.linked.toposoid.common.mq.{DocumentRegistration, KnowledgeRegistration}
 import com.ideal.linked.toposoid.knowledgebase.document.model.{Document, Propositions}
 import com.ideal.linked.toposoid.knowledgebase.model.PredicateArgumentStructure
@@ -54,6 +54,16 @@ import scala.concurrent.duration._
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
 
+import org.apache.pekko.stream.connectors.awsspi.PekkoHttpClient
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.connectors.sqs.SqsSourceSettings
+import org.apache.pekko.stream.connectors.sqs.scaladsl.SqsSource
+import scala.collection.immutable
+import org.apache.pekko.stream.connectors.sqs.MessageAction
+import org.apache.pekko.stream.connectors.sqs.scaladsl.SqsAckFlow
+import org.apache.pekko.stream.scaladsl.Sink
+import org.apache.pekko.stream.connectors.sqs.SqsAckResult
+
 object DocumentAnalysisSubscriber extends App {
 
   val endpoint = "http://" + conf.getString("TOPOSOID_MQ_HOST") + ":" + conf.getString("TOPOSOID_MQ_PORT")
@@ -69,8 +79,7 @@ object DocumentAnalysisSubscriber extends App {
     )
     .endpointOverride(URI.create(endpoint)) // (2)
     .region(Region.AP_NORTHEAST_1)
-    .httpClient(AkkaHttpClient.builder()
-      .withActorSystem(actorSystem).build())
+    .httpClient(PekkoHttpClient.builder().withActorSystem(actorSystem).build())
     .build()
 
   private val queueUrl = endpoint + "/" + conf.getString("TOPOSOID_MQ_DOCUMENT_ANALYSIS_QUENE")
@@ -175,12 +184,12 @@ object DocumentAnalysisSubscriber extends App {
 
       def getNonSentenceTuples(propositions: List[List[Knowledge]]): List[(Int, Int, List[String])] = {
         val title = propositions.head.head.knowledgeForDocument.titleOfTopPage
-        propositions.foldLeft(List((TITLE_OF_TOP_PAGE.index, -1, List(title)))) {
+        propositions.foldLeft(List((NonSentenceType.TITLE_OF_TOP_PAGE.index, -1, List(title)))) {
           (acc, x) => {
             acc ::: x.map(y => {
-              val referenceTuple = (REFERENCES.index, y.documentPageReference.pageNo, y.documentPageReference.references)
-              val tocTuple = (TABLE_OF_CONTENTS.index, y.documentPageReference.pageNo, y.documentPageReference.tableOfContents)
-              val headlineTuple = (HEADLINES.index, y.documentPageReference.pageNo, y.documentPageReference.headlines)
+              val referenceTuple = (NonSentenceType.REFERENCES.index, y.documentPageReference.pageNo, y.documentPageReference.references)
+              val tocTuple = (NonSentenceType.TABLE_OF_CONTENTS.index, y.documentPageReference.pageNo, y.documentPageReference.tableOfContents)
+              val headlineTuple = (NonSentenceType.HEADLINES.index, y.documentPageReference.pageNo, y.documentPageReference.headlines)
               List(referenceTuple, tocTuple, headlineTuple)
             }).flatten
           }

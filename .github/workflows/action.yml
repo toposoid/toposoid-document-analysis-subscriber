@@ -33,7 +33,6 @@ jobs:
             sed -i s/___###YOUR_ADOBE_PDF_SERVICES_CLIENT_SECRET###___/${{ secrets.ADOBE_PDF_SERVICES_CLIENT_SECRET }}/g docker-compose-workflow.yml
             sed -i s/__##YOUR_AWS_ACCESS_KEY##__/${{ secrets.AWS_CREDENTIAL_ACCESSKEY }}/g docker-compose-workflow.yml
             sed -i s/__##YOUR_AWS_SECRET_KEY##__/${{ secrets.AWS_CREDINTIAL_SECRETKEY }}/g docker-compose-workflow.yml
-            sed -i s/__##YOUR_AKKA_LICENCE_KEY##__/${{ secrets.AKKA_LICENCE_KEY }}/g docker-compose-workflow.yml
             docker compose -f docker-compose-workflow.yml up -d toposoid-document-analysis-subscriber
             docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt headerCheck"
             docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt test:headerCheck"

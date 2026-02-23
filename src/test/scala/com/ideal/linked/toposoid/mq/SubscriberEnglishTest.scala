@@ -17,7 +17,7 @@
 
 package com.ideal.linked.toposoid.mq
 
-import com.ideal.linked.toposoid.common.{DOCUMENT_ID, FeatureType, IMAGE, NON_SENTENCE, PROPOSITION_ID, SENTENCE, TransversalState}
+import com.ideal.linked.toposoid.common.{SuperiorType, FeatureType, TransversalState}
 import com.ideal.linked.toposoid.knowledgebase.regist.model.{ImageReference, KnowledgeForImage, Reference}
 import com.ideal.linked.toposoid.mq.TestUtils.uploadImage
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
@@ -144,10 +144,10 @@ class SubscriberEnglishTest extends AnyFlatSpec with BeforeAndAfter with BeforeA
 
     //ベクトル情報削除
     propositionIds2.foreach(x => {
-      deleteFeatureVector(x, SENTENCE, lang, PROPOSITION_ID.index, transversalState: TransversalState)
-      deleteFeatureVector(x, IMAGE, lang, PROPOSITION_ID.index, transversalState: TransversalState)
+      deleteFeatureVector(x, FeatureType.SENTENCE, lang, SuperiorType.PROPOSITION_ID.index, transversalState: TransversalState)
+      deleteFeatureVector(x, FeatureType.IMAGE, lang, SuperiorType.PROPOSITION_ID.index, transversalState: TransversalState)
     })
-    deleteFeatureVector(documentId, NON_SENTENCE, lang, DOCUMENT_ID.index, transversalState: TransversalState)
+    deleteFeatureVector(documentId, FeatureType.NON_SENTENCE, lang, SuperiorType.DOCUMENT_ID.index, transversalState: TransversalState)
 
 
   }
