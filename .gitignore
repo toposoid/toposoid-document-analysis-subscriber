@@ -9,8 +9,11 @@ docker-compose-local.yml
 src/test/resources/real-documents/*
 docker-compose-test.yml
 docker-compose-tool.yml
+docker-compose-dev.yml
 .devcontainer
 .metals
 .vscode
 project/project
 project/metals.sbt
+.bloop
+
