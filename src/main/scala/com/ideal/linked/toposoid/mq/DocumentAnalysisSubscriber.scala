@@ -17,22 +17,17 @@
 
 package com.ideal.linked.toposoid.mq
 
-//import akka.actor.ActorSystem
-//import akka.stream.alpakka.sqs.{MessageAction, SqsAckResult, SqsSourceSettings}
-//import akka.stream.alpakka.sqs.scaladsl.{SqsAckFlow, SqsSource}
-//import akka.stream.scaladsl.Sink
-//import com.github.matsluni.akkahttpspi.AkkaHttpClient
 import com.ibm.icu.text.Transliterator
 import com.ideal.linked.common.DeploymentConverter.conf
 import com.ideal.linked.toposoid.common.ToposoidUtils.assignId
-import com.ideal.linked.toposoid.common.{Neo4JUtils, Neo4JUtilsImpl, NonSentenceType, ToposoidUtils, TransversalState}
+import com.ideal.linked.toposoid.common.{Neo4JUtils, Neo4JUtilsImpl, NonSentenceType, ToposoidUtils, TransversalState, ActionModeType}
 import com.ideal.linked.toposoid.common.mq.{DocumentRegistration, KnowledgeRegistration}
 import com.ideal.linked.toposoid.knowledgebase.document.model.{Document, Propositions}
 import com.ideal.linked.toposoid.knowledgebase.model.PredicateArgumentStructure
 import com.ideal.linked.toposoid.knowledgebase.regist.model.{ImageReference, Knowledge, KnowledgeForImage, KnowledgeForTable, KnowledgeSentenceSet, PropositionRelation, Reference, TableReference}
 import com.ideal.linked.toposoid.knowledgebase.regist.rdb.model.{DocumentAnalysisResultHistoryRecord, KnowledgeRegisterHistoryRecord, NonSentenceSectionsRecord}
 import com.ideal.linked.toposoid.mq.RdbUtils.{addDocumentRegistrationResult, addKnowledgeRegistrationResult, addNonSentenceSectionResultSub}
-import com.ideal.linked.toposoid.protocol.model.base.AnalyzedSentenceObjects
+import com.ideal.linked.toposoid.protocol.model.base.{AnalyzedSentenceObjects, DeductionConfiguration}
 import com.ideal.linked.toposoid.protocol.model.neo4j.Neo4jRecords
 import com.ideal.linked.toposoid.protocol.model.parser.{InputSentenceForParser, KnowledgeForParser, KnowledgeSentenceSetForParser}
 import com.ideal.linked.toposoid.sentence.transformer.neo4j.{AnalyzedPropositionPair, AnalyzedPropositionSet, Sentence2Neo4jTransformer}
@@ -311,7 +306,7 @@ object DocumentAnalysisSubscriber extends App {
               (acc, x) => {
                 //SentenceParserで解析
                 val knowledgeForParser: KnowledgeForParser = x
-                val inputSentenceForParser = InputSentenceForParser(List.empty[KnowledgeForParser], List(knowledgeForParser))
+                val inputSentenceForParser = InputSentenceForParser(List.empty[KnowledgeForParser], List(knowledgeForParser), ActionModeType.REGISTRATION_MODE.index)
                 val json: String = Json.toJson(inputSentenceForParser).toString()
 
                 /*
@@ -338,7 +333,8 @@ object DocumentAnalysisSubscriber extends App {
                   }
                   case ToposoidUtils.langPatternSpecialSymbol1() => {
                     val aso = ToposoidUtils.parseSpecialSymbol(knowledgeForParser)
-                    AnalyzedSentenceObjects(List(aso))
+                    val deductionCofiguration = DeductionConfiguration(inputSentenceForParser.actionModeType, "", Map.empty[String,String]) 
+                    AnalyzedSentenceObjects(List(aso), deductionCofiguration)
                   }
                   case _ => throw new Exception("It is an invalid locale or an unsupported locale.")
                 }
