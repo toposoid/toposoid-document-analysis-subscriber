@@ -122,9 +122,13 @@ services:
     ports:
       - 9008:9008
   corenlp:
-    image: toposoid/corenlp:3.4.2-lowspec
+    image: toposoid/corenlp:3.4.2
     ports:
       - 9000:9000
+    environment:
+      - TOPOSOID_JVM_XMS=512m
+      - TOPOSOID_JVM_XMX=2g
+      - TOPOSOID_JVM_XSS=512k                
   neo4j:
     #    container_name: Neo4j-test
     image: neo4j:4.4.23
