@@ -21,7 +21,7 @@ import com.ideal.linked.toposoid.common.{SuperiorType, FeatureType, TransversalS
 import com.ideal.linked.toposoid.knowledgebase.regist.model.{ImageReference, KnowledgeForImage, Reference}
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
 import org.scalatest.flatspec.AnyFlatSpec
-import com.ideal.linked.toposoid.mq.TestUtils.{deleteFeatureVector, deleteNeo4JAllData, searchDocumentAnalysisResultHistoryRecord, searchKnowledgeRegisterHistoryRecord, searchNonSentenceSectionsRecord, uploadDocumentFile, uploadImage}
+import com.ideal.linked.toposoid.mq.TestUtils.{deleteFeatureVector, deleteNeo4JAllData, searchDocumentAnalysisResultHistoryRecord, searchKnowledgeRegisterHistoryRecord, searchNonSentenceSectionsRecord, uploadDocumentFile, uploadImage, uploadTable}
 import com.ideal.linked.toposoid.protocol.model.neo4j.Neo4jRecords
 import com.ideal.linked.toposoid.sentence.transformer.neo4j.Sentence2Neo4jTransformer.neo4JUtils.executeQueryAndReturn
 //import io.jvm.uuid.UUID
@@ -99,6 +99,11 @@ class SubscriberJapaneseTest extends AnyFlatSpec with BeforeAndAfter with Before
     val searchImages = TestUtils.searchImageVector(imageInfo.imageReference.reference.url, transversalState)
     assert(searchImages.ids.size == 1)
 
+    //データ
+    val tableInfo = uploadTable(Paths.get("src/test/resources/JAPANESE_TEST_TABLE.tsv"), transversalState)
+    val searchTables = TestUtils.searchTableVector(tableInfo.tableReference.reference.url, transversalState)
+    assert(searchTables.ids.size == 1)
+
     //non-センテンス
     val titles = List(title)
     val tocs = List(toc1, toc2, toc3)
@@ -144,6 +149,7 @@ class SubscriberJapaneseTest extends AnyFlatSpec with BeforeAndAfter with Before
     propositionIds2.foreach(x => {
       deleteFeatureVector(x, FeatureType.SENTENCE, "ja_JP", SuperiorType.PROPOSITION_ID.index, transversalState: TransversalState)
       deleteFeatureVector(x, FeatureType.IMAGE, "ja_JP", SuperiorType.PROPOSITION_ID.index, transversalState: TransversalState)
+      deleteFeatureVector(x, FeatureType.TABLE, "ja_JP", SuperiorType.PROPOSITION_ID.index, transversalState: TransversalState)
     })
     deleteFeatureVector(documentId, FeatureType.NON_SENTENCE, "ja_JP", SuperiorType.DOCUMENT_ID.index, transversalState: TransversalState)
 

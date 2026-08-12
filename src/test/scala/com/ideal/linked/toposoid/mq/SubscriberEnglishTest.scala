@@ -19,10 +19,9 @@ package com.ideal.linked.toposoid.mq
 
 import com.ideal.linked.toposoid.common.{SuperiorType, FeatureType, TransversalState}
 import com.ideal.linked.toposoid.knowledgebase.regist.model.{ImageReference, KnowledgeForImage, Reference}
-import com.ideal.linked.toposoid.mq.TestUtils.uploadImage
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
 import org.scalatest.flatspec.AnyFlatSpec
-import com.ideal.linked.toposoid.mq.TestUtils.{deleteFeatureVector, deleteNeo4JAllData, searchDocumentAnalysisResultHistoryRecord, searchKnowledgeRegisterHistoryRecord, searchNonSentenceSectionsRecord, uploadDocumentFile}
+import com.ideal.linked.toposoid.mq.TestUtils.{deleteFeatureVector, deleteNeo4JAllData, searchDocumentAnalysisResultHistoryRecord, searchKnowledgeRegisterHistoryRecord, searchNonSentenceSectionsRecord, uploadDocumentFile, uploadImage, uploadTable}
 import com.ideal.linked.toposoid.protocol.model.neo4j.Neo4jRecords
 import com.ideal.linked.toposoid.sentence.transformer.neo4j.Sentence2Neo4jTransformer.neo4JUtils.executeQueryAndReturn
 //import io.jvm.uuid.UUID
@@ -101,6 +100,11 @@ class SubscriberEnglishTest extends AnyFlatSpec with BeforeAndAfter with BeforeA
     val searchImages = TestUtils.searchImageVector(imageInfo.imageReference.reference.url, transversalState)
     assert(searchImages.ids.size == 1)
 
+    //データ
+    val tableInfo = uploadTable(Paths.get("src/test/resources/ENGLISH_TEST_TABLE.tsv"), transversalState)
+    val searchTables = TestUtils.searchTableVector(tableInfo.tableReference.reference.url, transversalState)
+    assert(searchTables.ids.size == 1)
+
     //non-センテンス
     val titles = List(title)
     val tocs = List(toc1, toc2, toc3)
@@ -146,6 +150,7 @@ class SubscriberEnglishTest extends AnyFlatSpec with BeforeAndAfter with BeforeA
     propositionIds2.foreach(x => {
       deleteFeatureVector(x, FeatureType.SENTENCE, lang, SuperiorType.PROPOSITION_ID.index, transversalState: TransversalState)
       deleteFeatureVector(x, FeatureType.IMAGE, lang, SuperiorType.PROPOSITION_ID.index, transversalState: TransversalState)
+      deleteFeatureVector(x, FeatureType.TABLE, "ja_JP", SuperiorType.PROPOSITION_ID.index, transversalState: TransversalState)
     })
     deleteFeatureVector(documentId, FeatureType.NON_SENTENCE, lang, SuperiorType.DOCUMENT_ID.index, transversalState: TransversalState)
 
