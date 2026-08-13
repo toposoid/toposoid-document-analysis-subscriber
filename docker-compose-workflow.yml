@@ -41,7 +41,15 @@ services:
       - TOPOSOID_NON_SENTENCE_VECTORDB_ACCESSOR_PORT=9011
       - TOPOSOID_TABLE_VECTORDB_ACCESSOR_HOST=data-accessor-table-weaviate-web
       - TOPOSOID_TABLE_VECTORDB_ACCESSOR_PORT=9011
-
+    depends_on:
+      - elasticmq
+      - data-accessor-neo4j-web
+      - data-accessor-mysql-web
+      - data-accessor-sentence-weaviate-web
+      - data-accessor-image-weaviate-web
+      - data-accessor-non-sentence-weaviate-web
+      - data-accessor-table-weaviate-web
+      - toposoid-contents-admin-web
 
   toposoid-contents-admin-web:
     image: toposoid/toposoid-contents-admin-web:0.7-SNAPSHOT
@@ -163,7 +171,9 @@ services:
       - PLAY_HTTP_PORT=9005
     ports:
       - 9005:9005
-
+    depends_on:
+      - neo4j
+ 
   toposoid-common-image-recognition-web:
     image: toposoid/toposoid-common-image-recognition-web:0.7-SNAPSHOT-lowspec
     environment:

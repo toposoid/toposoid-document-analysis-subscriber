@@ -34,12 +34,12 @@ jobs:
             docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt headerCheck"
             docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt test:headerCheck"
             docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt compile"
+            docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt 'runMain com.ideal.linked.toposoid.mq.DocumentAnalysisSubscriber' &"
+            echo 'quit' | curl -s -o /dev/null telnet://localhost:3306
             curl --retry 15 --retry-delay 5 --retry-all-errors -X POST http://localhost:7474
             curl --retry 15 --retry-delay 5 --retry-all-errors -X POST -H "Content-Type: application/json" -H "X_TOPOSOID_TRANSVERSAL_STATE: {'userId':'test-user', 'username':'guest', 'roleId':0, 'csrfToken':''}" -d '{"sentence": "これはテストです。"}' http://localhost:9006/getFeatureVector
-            curl --retry 15 --retry-delay 5 --retry-all-errors -X POST -H "Content-Type: application/json" -H "X_TOPOSOID_TRANSVERSAL_STATE: {'userId':'test-user', 'username':'guest', 'roleId':0, 'csrfToken':''}" -d '{"sentence": "This is a test"}' http://localhost:9008/getFeatureVector
-            echo 'quit' | curl -s -o /dev/null telnet://localhost:3306
-            for i in {1..10}; do echo "PING" | nc -w 5 localhost 3310 | grep -q "PONG" && { echo "OK!"; break; } || { echo "NG ($i/10) RETRY..."; sleep 2; [ $i -eq 10 ] && exit 1; }; done
-            docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt 'runMain com.ideal.linked.toposoid.mq.DocumentAnalysisSubscriber' &"
+            curl --retry 15 --retry-delay 5 --retry-all-errors -X POST -H "Content-Type: application/json" -H "X_TOPOSOID_TRANSVERSAL_STATE: {'userId':'test-user', 'username':'guest', 'roleId':0, 'csrfToken':''}" -d '{"sentence": "This is a test"}' http://localhost:9008/getFeatureVector            
+            for i in {1..10}; do echo "PING" | nc -w 5 localhost 3310 | grep -q "PONG" && { echo "OK!"; break; } || { echo "NG ($i/10) RETRY..."; sleep 2; [ $i -eq 10 ] && exit 1; }; done            
             docker compose -f docker-compose-workflow.yml exec -T ${{ env.PJ_REPO }} bash -c "cd ${{ env.PJ_REPO }} && sbt 'testOnly **.*JapaneseTest'"
             docker compose -f docker-compose-workflow.yml rm -fsv toposoid-common-nlp-japanese-web
             docker compose -f docker-compose-workflow.yml rm -fsv toposoid-sentence-parser-japanese-web
