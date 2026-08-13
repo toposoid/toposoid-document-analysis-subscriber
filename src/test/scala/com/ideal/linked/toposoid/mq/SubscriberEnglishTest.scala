@@ -150,7 +150,7 @@ class SubscriberEnglishTest extends AnyFlatSpec with BeforeAndAfter with BeforeA
     propositionIds2.foreach(x => {
       deleteFeatureVector(x, FeatureType.SENTENCE, lang, SuperiorType.PROPOSITION_ID.index, transversalState: TransversalState)
       deleteFeatureVector(x, FeatureType.IMAGE, lang, SuperiorType.PROPOSITION_ID.index, transversalState: TransversalState)
-      deleteFeatureVector(x, FeatureType.TABLE, "ja_JP", SuperiorType.PROPOSITION_ID.index, transversalState: TransversalState)
+      deleteFeatureVector(x, FeatureType.TABLE, lang, SuperiorType.PROPOSITION_ID.index, transversalState: TransversalState)
     })
     deleteFeatureVector(documentId, FeatureType.NON_SENTENCE, lang, SuperiorType.DOCUMENT_ID.index, transversalState: TransversalState)
 
