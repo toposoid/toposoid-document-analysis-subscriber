@@ -42,6 +42,8 @@ import com.ideal.linked.toposoid.knowledgebase.regist.model.KnowledgeForTable
 import java.nio.file.Paths
 import com.ideal.linked.toposoid.knowledgebase.regist.model.TableReference
 import com.ideal.linked.toposoid.knowledgebase.table.model.SingleTable
+import com.ideal.linked.toposoid.knowledgebase.table.model.RegisteredTableContentResult
+import com.ideal.linked.toposoid.knowledgebase.image.model.RegisteredImageContentResult
 
 
 case class UploadContentContext(featureType:Int, url:String = "")
@@ -246,7 +248,18 @@ object TestUtils {
 
     val reference = Reference(url = uploadResult.url, surface = "", surfaceIndex = -1, isWholeSentence = false, originalUrlOrReference = "http://images.cocodataset.org/val2017/000000039769.jpg", metaInformations = List.empty[String])
     val imageReference = ImageReference(reference = reference, x = 0, y = 0, width = 640, height = 480)
-    KnowledgeForImage(id = uploadResult.id, imageReference = imageReference)
+    //KnowledgeForImage(id = uploadResult.id, imageReference = imageReference)
+    val knowledgeForImage2 = KnowledgeForImage(id = uploadResult.id, imageReference = imageReference)
+    val json = Json.toJson(knowledgeForImage2).toString()
+    val result = ToposoidUtils.callComponent(json, conf.getString("TOPOSOID_CONTENTS_ADMIN_HOST"), conf.getString("TOPOSOID_CONTENTS_ADMIN_PORT"), "convertImage", transversalState)
+    val registeredImageContentResult = Json.parse(result).as[RegisteredImageContentResult]
+
+    if(registeredImageContentResult.statusInfo.status.equals("OK")){
+      registeredImageContentResult.knowledgeForImage
+    }else{
+      throw Exception(registeredImageContentResult.statusInfo.message)
+    }
+  
   }
 
   def uploadTable(file:Path, transversalState: TransversalState): KnowledgeForTable = {
@@ -272,7 +285,17 @@ object TestUtils {
     val uploadResult = Json.parse(responseJson).as[UploadResult]
     val reference = Reference(url = uploadResult.url, surface = "", surfaceIndex = -1, isWholeSentence = false, originalUrlOrReference = file.getFileName().toString(), metaInformations = List.empty[String])
     val tableReference = TableReference(reference=reference)
-    KnowledgeForTable(id = uploadResult.id, tableReference = tableReference)
+    val knowledgeForTable = KnowledgeForTable(id = uploadResult.id, tableReference = tableReference)
+
+    val json = Json.toJson(knowledgeForTable).toString()
+    val result = ToposoidUtils.callComponent(json, conf.getString("TOPOSOID_CONTENTS_ADMIN_HOST"), conf.getString("TOPOSOID_CONTENTS_ADMIN_PORT"), "convertTable", transversalState)
+    val registeredTableContentResult = Json.parse(result).as[RegisteredTableContentResult]
+
+    if(registeredTableContentResult.statusInfo.status.equals("OK")){
+      registeredTableContentResult.knowledgeForTable
+    }else{
+      throw Exception(registeredTableContentResult.statusInfo.message)
+    }
 
   }
 

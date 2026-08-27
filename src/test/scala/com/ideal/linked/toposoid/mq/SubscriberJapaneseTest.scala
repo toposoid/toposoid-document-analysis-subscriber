@@ -17,6 +17,7 @@
 
 package com.ideal.linked.toposoid.mq
 
+import com.ideal.linked.common.DeploymentConverter.conf
 import com.ideal.linked.toposoid.common.{SuperiorType, FeatureType, TransversalState}
 import com.ideal.linked.toposoid.knowledgebase.regist.model.{ImageReference, KnowledgeForImage, Reference}
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
@@ -27,6 +28,7 @@ import com.ideal.linked.toposoid.sentence.transformer.neo4j.Sentence2Neo4jTransf
 //import io.jvm.uuid.UUID
 
 import java.nio.file.{Path, Paths}
+import com.ideal.linked.toposoid.common.ToposoidUtils
 
 class SubscriberJapaneseTest extends AnyFlatSpec with BeforeAndAfter with BeforeAndAfterAll{
 
@@ -37,6 +39,11 @@ class SubscriberJapaneseTest extends AnyFlatSpec with BeforeAndAfter with Before
   }
 
   override def beforeAll(): Unit = {
+    ToposoidUtils.callComponent("{}", conf.getString("TOPOSOID_SENTENCE_VECTORDB_ACCESSOR_HOST"), conf.getString("TOPOSOID_SENTENCE_VECTORDB_ACCESSOR_PORT"), "createSchema", transversalState)
+    ToposoidUtils.callComponent("{}", conf.getString("TOPOSOID_IMAGE_VECTORDB_ACCESSOR_HOST"), conf.getString("TOPOSOID_IMAGE_VECTORDB_ACCESSOR_PORT"), "createSchema", transversalState)
+    ToposoidUtils.callComponent("{}", conf.getString("TOPOSOID_TABLE_VECTORDB_ACCESSOR_HOST"), conf.getString("TOPOSOID_TABLE_VECTORDB_ACCESSOR_PORT"), "createSchema", transversalState)
+    ToposoidUtils.callComponent("{}", conf.getString("TOPOSOID_NON_SENTENCE_VECTORDB_ACCESSOR_HOST"), conf.getString("TOPOSOID_NON_SENTENCE_VECTORDB_ACCESSOR_PORT"), "createSchema", transversalState)
+ 
     deleteNeo4JAllData(transversalState)
   }
 
